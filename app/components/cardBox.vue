@@ -2,7 +2,7 @@
 div
   // Game Title from API - Dynamic
   div(class="" v-if="data?.name")
-    h1(class="text-[2.5rem]").font-semibold.font-poppins {{ data.name }}
+    h1(class="text-2xl xl:text-[2.5rem]").font-semibold.font-poppins {{ data.name }}
   
   
   // Loading state for title

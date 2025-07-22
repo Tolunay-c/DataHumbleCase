@@ -37,7 +37,7 @@ div.flex.flex-col.gap-3
         span.text-sm.text-gray-500 ({{ formatPercentage(data.hoursWatched?.deltaPercentage) }})
 
     // Average Viewers  
-    div(class="bg-[#F5F7FB] rounded-lg p-4")
+    div(class="bg-[#F5F7FB] rounded-lg p-4 flex flex-col gap-6")
       h3(class="text-[#111111] font-poppins font-semibold text-xl") Average Viewers
       div.text-5xl.font-poppins.font-semibold {{ formatNumber(data.averageViewers?.value) }}
       div.flex.items-center.gap-1

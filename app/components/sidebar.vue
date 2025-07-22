@@ -63,7 +63,7 @@ const sidebarMenuItems = {
         type: 'section',
         title: 'Settings',
         items: [
-            { name: 'Settings', icon: 'material-symbols:dashboard-rounded', link: '/settings' },
+            { name: 'Settings', icon: 'solar:settings-bold', link: '/settings' },
             { name: 'Logout', icon: 'solar:logout-2-bold', link: '/logout' }
         ]
     }
