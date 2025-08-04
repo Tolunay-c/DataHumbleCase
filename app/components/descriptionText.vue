@@ -1,25 +1,24 @@
 <template lang="pug">
 div.rounded-2xl
   // Loading State
-  div(v-if="pending")
+  div(v-if="loading")
     div.space-y-3
       div.h-4.bg-gray-200.rounded.animate-pulse
       div.h-4.bg-gray-200.rounded.animate-pulse.w-4/5
       div.h-4.bg-gray-200.rounded.animate-pulse.w-3/5
 
   // Error State
-  div(v-else-if="error")
+  div(v-else-if="!description && !loading")
     div.flex.items-center.gap-2.text-red-600
       UIcon(name="i-heroicons-exclamation-triangle" class="w-5 h-5")
-      span.text-sm Açıklama yüklenirken hata oluştu
+      span.text-sm Açıklama bulunamadı
 
   // Description Content
-  div(v-else-if="data?.description")
+  div(v-else-if="description")
     div(:class="titleClass" v-if="showTitle") {{ title }}
     div(:class="contentClass")
       p(
-        class=" font-roboto font-normal leading-relaxed text-base overflow-hidden line-clamp-6 text-justify"
-        
+        class="font-roboto font-normal leading-relaxed text-base overflow-hidden line-clamp-6 text-justify"
       ) {{ repeatedText }}
 
   // No Description
@@ -28,11 +27,19 @@ div.rounded-2xl
 </template>
 
 <script setup>
-// Props tanımlaması
+// Props tanımlaması - API isteği yok, sadece props!
 const props = defineProps({
   title: {
     type: String,
     default: 'Description'
+  },
+  description: {
+    type: String,
+    default: null
+  },
+  loading: {
+    type: Boolean,
+    default: false
   },
   showTitle: {
     type: Boolean,
@@ -48,20 +55,9 @@ const props = defineProps({
   }
 })
 
-// API'den veri çekme
-const { data, pending, error } = await useFetch(
-  'https://dhcase-mockapi.vercel.app/api/game/578080/overview',
-  {
-    key: 'game-description',
-    default: () => ({ description: null }),
-    server: true,
-    pick: ['description']
-  }
-)
-
-// Text'i 3 kere tekrarla
+// Text'i 3 kere tekrarla - props'tan
 const repeatedText = computed(() => {
-  if (!data.value?.description) return ''
-  return `${data.value.description} ${data.value.description} ${data.value.description}`
+  if (!props.description) return ''
+  return `${props.description} ${props.description} ${props.description}`
 })
 </script>

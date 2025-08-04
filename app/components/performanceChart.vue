@@ -1,32 +1,33 @@
 <template lang="pug">
-div.rounded-2xl
+div(class="rounded-2xl")
   // Header
-  div.flex.justify-between.items-center.mb-6
-    h2.text-xl.font-bold.text-gray-800 Performance
+  div(class="flex justify-between items-center mb-6")
+    h2(class="text-xl font-bold text-gray-800") Performance
     USelectMenu(
       v-model="selectedPeriod"
       :options="periodOptions"
       value-attribute="value"
       option-attribute="label"
       class="w-32"
+      :disabled="loading"
     )
       template(#label)
-        span.text-sm.text-gray-600 {{ selectedPeriod.label }}
+        span(class="text-sm text-gray-600") {{ selectedPeriod.label }}
       template(#option="{ option }")
-        span.text-sm {{ option.label }}
+        span(class="text-sm") {{ option.label }}
 
   // Loading State
-  div.flex.items-center.justify-center.h-80(v-if="pending")
-    div.animate-spin.rounded-full.h-8.w-8.border-b-2.border-blue-500
+  div(class="flex items-center justify-center h-80" v-if="loading")
+    div(class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500")
 
   // Error State  
-  div.flex.items-center.justify-center.h-80(v-else-if="error")
-    div.text-center
+  div(class="flex items-center justify-center h-80" v-else-if="!performanceData?.dates?.length")
+    div(class="text-center")
       UIcon(name="i-heroicons-exclamation-triangle" class="w-12 h-12 text-red-500 mx-auto mb-2")
-      p.text-red-600 Grafik yüklenirken hata oluştu
+      p(class="text-red-600") Grafik verisi bulunamadı
 
   // Chart
-  div(class="w-[80%] mx-auto ").h-80(v-else-if="chartData")
+  div(class="w-[80%] mx-auto h-80" v-else-if="chartData")
     Line(
       :data="chartData"
       :options="chartOptions"
@@ -46,6 +47,18 @@ import {
   Legend,
   Filler
 } from 'chart.js'
+
+// Props tanımla - API isteği yok!
+const props = defineProps({
+  performanceData: {
+    type: Object,
+    default: () => ({ dates: [], watchTime: [], engagement: [] })
+  },
+  loading: {
+    type: Boolean,
+    default: false
+  }
+})
 
 // Chart.js kayıt
 ChartJS.register(
@@ -70,34 +83,16 @@ const periodOptions = [
 // Reaktif period seçimi
 const selectedPeriod = ref(periodOptions[0])
 
-// API'den veri çekme - period değiştiğinde otomatik yenilenir
-const { data: performanceData, pending, error } = await useFetch(
-  'https://dhcase-mockapi.vercel.app/api/game/578080/performance',
-  {
-    key: 'performance-data',
-    query: {
-      period: computed(() => selectedPeriod.value.value)
-    },
-    default: () => ({ dates: [], watchTime: [], engagement: [] }),
-    server: false, // Client-side için
-    watch: [selectedPeriod] // Period değişince yeniden çek
-  }
-)
-
 // Zaman formatı (saat)
 const formatTime = (value) => {
-  if (value >= 12) {
-    return `${value}h`
-  } else {
-    return `${value}h`
-  }
+  return `${value}h`
 }
 
-// Chart.js veri formatı
+// Chart.js veri formatı - props'tan hesapla
 const chartData = computed(() => {
-  if (!performanceData.value?.dates?.length) return null
+  if (!props.performanceData?.dates?.length) return null
   
-  const data = performanceData.value
+  const data = props.performanceData
   
   // X ekseni etiketleri - tarihlerden gün çıkar (01, 02, 03...)
   const labels = data.dates.map(date => {

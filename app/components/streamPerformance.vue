@@ -1,25 +1,24 @@
 <template lang="pug">
-
 div.flex.flex-col.gap-3
- div(class="border-[#E6E6E6] ps-3").border-s
-  h2.text-xl.font-semibold.font-poppins Stream Performance
- div(class="bg-[#F5F7FB]").p-6.rounded-2xl
-  // Loading State
-  div.flex.items-center.justify-center.h-60(v-if="pending")
-    div.animate-spin.rounded-full.h-8.w-8.border-b-2.border-blue-500
+  div(class="border-[#E6E6E6] ps-3").border-s
+    h2.text-xl.font-semibold.font-poppins Stream Performance
+  div(class="bg-[#F5F7FB]").p-6.rounded-2xl
+    // Loading State
+    div.flex.items-center.justify-center.h-60(v-if="loading")
+      div.animate-spin.rounded-full.h-8.w-8.border-b-2.border-blue-500
 
-  // Error State  
-  div.flex.items-center.justify-center.h-60(v-else-if="error")
-    div.text-center
-      UIcon(name="i-heroicons-exclamation-triangle" class="w-12 h-12 text-red-500 mx-auto mb-2")
-      p.text-red-600 Stream verileri yüklenirken hata oluştu
+    // Error State  
+    div.flex.items-center.justify-center.h-60(v-else-if="!streamData?.dailyStreamCounts")
+      div.text-center
+        UIcon(name="i-heroicons-exclamation-triangle" class="w-12 h-12 text-red-500 mx-auto mb-2")
+        p.text-red-600 Stream verileri bulunamadı
 
-  // Chart
-  div.h-60(v-else-if="chartData")
-    Bar(
-      :data="chartData"
-      :options="chartOptions"
-    )
+    // Chart
+    div.h-60(v-else-if="chartData")
+      Bar(
+        :data="chartData"
+        :options="chartOptions"
+      )
 </template>
 
 <script setup>
@@ -34,6 +33,18 @@ import {
   Legend
 } from 'chart.js'
 
+// Props tanımla - API isteği yok!
+const props = defineProps({
+  streamData: {
+    type: Object,
+    default: () => ({ dailyStreamCounts: {} })
+  },
+  loading: {
+    type: Boolean,
+    default: false
+  }
+})
+
 // Chart.js kayıt
 ChartJS.register(
   CategoryScale,
@@ -42,16 +53,6 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend
-)
-
-// API'den veri çekme
-const { data: streamData, pending, error } = await useFetch(
-  'https://dhcase-mockapi.vercel.app/api/game/578080/stream',
-  {
-    key: 'stream-performance',
-    default: () => ({ dailyStreamCounts: {} }),
-    server: false
-  }
 )
 
 // Gün isimlerini kısaltma
@@ -65,11 +66,11 @@ const dayAbbreviations = {
   'Sunday': 'Sun'
 }
 
-// Chart.js veri formatı
+// Chart.js veri formatı - props'tan hesapla
 const chartData = computed(() => {
-  if (!streamData.value?.dailyStreamCounts) return null
+  if (!props.streamData?.dailyStreamCounts) return null
   
-  const dailyCounts = streamData.value.dailyStreamCounts
+  const dailyCounts = props.streamData.dailyStreamCounts
   
   // Günleri sırala (Pazartesi'den Cuma'ya)
   const orderedDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
